@@ -12,34 +12,30 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Update Databricks Repo via API
+    - name: Update Databricks Repo
       run: |
-        echo "🔄 Syncing with Databricks..."
+        echo "🔄 Updating sistecreditodb repo..."
         
-        # Obtener lista de repos
-        REPOS_RESPONSE=$(curl -s -X GET \
-          "${{ secrets.DATABRICKS_HOST }}/api/2.0/repos" \
-          -H "Authorization: Bearer ${{ secrets.DATABRICKS_TOKEN }}")
+        # Usar el ID exacto del repo que encontramos
+        REPO_ID="4472650222095333"
         
-        echo "📋 Repos found:"
-        echo "$REPOS_RESPONSE" | jq -r '.repos[].path'
+        echo "📍 Using repo ID: $REPO_ID"
         
-        # Buscar nuestro repo específico
-        REPO_ID=$(echo "$REPOS_RESPONSE" | jq -r '.repos[] | select(.path=="/Workspace/Users/pansezapata@gmail.com/sistecreditodb") | .id')
+        # Actualizar repo directamente con el ID conocido
+        UPDATE_RESPONSE=$(curl -s -w "%{http_code}" -X PATCH \
+          "${{ secrets.DATABRICKS_HOST }}/api/2.0/repos/$REPO_ID" \
+          -H "Authorization: Bearer ${{ secrets.DATABRICKS_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{"branch": "main"}')
         
-        if [ "$REPO_ID" != "null" ] && [ -n "$REPO_ID" ]; then
-          echo "✅ Found repo ID: $REPO_ID"
-          
-          # Actualizar a branch main
-          curl -X PATCH \
-            "${{ secrets.DATABRICKS_HOST }}/api/2.0/repos/$REPO_ID" \
-            -H "Authorization: Bearer ${{ secrets.DATABRICKS_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"branch": "main"}' \
-            --fail-with-body
-          
+        HTTP_CODE="${UPDATE_RESPONSE: -3}"
+        RESPONSE_BODY="${UPDATE_RESPONSE%???}"
+        
+        if [ "$HTTP_CODE" = "200" ]; then
           echo "✅ Databricks repo synced successfully!"
+          echo "📊 Response: $RESPONSE_BODY"
         else
-          echo "❌ Repo not found with path /Workspace/Users/pansezapata@gmail.com/sistecreditodb"
+          echo "❌ Update failed with HTTP $HTTP_CODE"
+          echo "🔍 Response: $RESPONSE_BODY"
           exit 1
         fi
