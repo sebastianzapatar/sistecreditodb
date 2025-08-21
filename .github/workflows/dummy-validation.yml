@@ -22,7 +22,6 @@ jobs:
     - name: 📦 Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        # Dependencias mínimas para tests dummy
         pip install pytest
         
     - name: 🏗️ Create Test Structure
@@ -41,8 +40,9 @@ jobs:
         echo "✅ Todos los tests pasaron"
         echo "🚀 Código aprobado para merge"
         
+    # ⚡ CAMBIO CLAVE: v3 → v4
     - name: 📊 Upload Test Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: validation-reports
@@ -63,7 +63,7 @@ jobs:
             
             ### Tests Ejecutados (Dummy Mode):
             - ✅ Estructura del repositorio
-            - ✅ Métricas del modelo (simuladas)
+            - ✅ Métricas del modelo (simuladas)  
             - ✅ Validación de datos (simulada)
             - ✅ Estabilidad del modelo (simulada)
             - ✅ Deployment readiness (simulado)
