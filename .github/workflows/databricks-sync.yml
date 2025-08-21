@@ -16,26 +16,19 @@ jobs:
       run: |
         echo "🔄 Updating sistecreditodb repo..."
         
-        # Usar el ID exacto del repo que encontramos
+        # Usar el ID exacto del repo
         REPO_ID="4472650222095333"
         
         echo "📍 Using repo ID: $REPO_ID"
+        echo "🌐 Host: ${{ secrets.DATABRICKS_HOST }}"
         
-        # Actualizar repo directamente con el ID conocido
-        UPDATE_RESPONSE=$(curl -s -w "%{http_code}" -X PATCH \
+        # Actualizar repo con el hostname correcto
+        curl -X PATCH \
           "${{ secrets.DATABRICKS_HOST }}/api/2.0/repos/$REPO_ID" \
           -H "Authorization: Bearer ${{ secrets.DATABRICKS_TOKEN }}" \
           -H "Content-Type: application/json" \
-          -d '{"branch": "main"}')
+          -d '{"branch": "main"}' \
+          --fail-with-body \
+          -v
         
-        HTTP_CODE="${UPDATE_RESPONSE: -3}"
-        RESPONSE_BODY="${UPDATE_RESPONSE%???}"
-        
-        if [ "$HTTP_CODE" = "200" ]; then
-          echo "✅ Databricks repo synced successfully!"
-          echo "📊 Response: $RESPONSE_BODY"
-        else
-          echo "❌ Update failed with HTTP $HTTP_CODE"
-          echo "🔍 Response: $RESPONSE_BODY"
-          exit 1
-        fi
+        echo "✅ Databricks repo synced successfully!"
