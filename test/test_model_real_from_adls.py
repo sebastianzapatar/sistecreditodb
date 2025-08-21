@@ -24,7 +24,7 @@ class RealModelFromADLSTest(unittest.TestCase):
         
         # Rutas en ADLS Gen2
         cls.model_container = "raw"
-        cls.model_path = "models/random_forest_credit_risk_20250821_112616"  # Usar tu timestamp real
+        cls.model_path = "models/random_forest_credit_risk_20250821_112616" 
         cls.data_path = "data/v1/credit_risk_dataset.csv"
         
         try:
