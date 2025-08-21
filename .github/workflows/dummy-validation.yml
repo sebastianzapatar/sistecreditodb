@@ -32,7 +32,7 @@ jobs:
     - name: 🧪 Run Dummy Validation Tests
       run: |
         echo "🔬 Ejecutando tests de validación dummy..."
-        python tests/test_dummy_validation.py
+        python test/test_dummy_validation.py
         
     - name: ✅ Validation Success
       run: |
