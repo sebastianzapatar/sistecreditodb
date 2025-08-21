@@ -38,7 +38,7 @@ jobs:
         AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
       run: |
         echo "🔬 Ejecutando validación real del modelo desde ADLS Gen2..."
-        python test/test_model_real_from_adls.py
+        python test/test_model_real_from_adls2.py
         
     - name: 📊 Generate Success Report
       if: success()
