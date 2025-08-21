@@ -9,7 +9,6 @@ on:
 jobs:
   sync-databricks:
     runs-on: ubuntu-latest
-    environment: production
     
     steps:
     - name: Checkout code
@@ -23,6 +22,6 @@ jobs:
         DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
         DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       run: |
-        echo "Updating Databricks Git folder..."
-        databricks repos update /Workspace/tu-folder-name --branch main
-        echo "Databricks folder updated successfully!"
+        echo "🔄 Updating Databricks Git folder..."
+        databricks repos update /Workspace/Repos/sebastianzapatar/sistecreditodb --branch main
+        echo "✅ Databricks folder updated successfully!"
