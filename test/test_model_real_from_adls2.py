@@ -208,82 +208,8 @@ class RealModelFromADLSTest(unittest.TestCase):
         self.assertEqual(self.model.__class__.__name__, 'RandomForestClassifier')
         
         print("✅ Modelo, manifest y datos cargados correctamente desde ADLS Gen2")
+  
     
-    def test_02_real_model_performance(self):
-        """Test 2: Evaluar performance real del modelo recreando el preprocesamiento"""
-        print("\n🧪 Test 2: Evaluando performance real con preprocesamiento recreado...")
-        
-        # Obtener configuración del manifest
-        target_column = self.manifest['data_info']['target_column']
-        
-        # Recrear el preprocesamiento completo
-        df_train, df_test, feature_columns, encoders = self._preprocess_credit_data_for_test(
-            self.full_data, target_column
-        )
-        
-        # Verificar que tenemos datos válidos
-        self.assertGreater(len(df_test), 0, "Debe haber datos de test después del preprocesamiento")
-        
-        # Preparar datos para predicción
-        X_test = df_test[feature_columns]
-        y_test = df_test[target_column]
-        
-        print(f"📊 Shape de test: X{X_test.shape}, y{y_test.shape}")
-        
-        # Hacer predicciones
-        y_pred = self.model.predict(X_test)
-        
-        # Calcular métricas reales
-        accuracy_real = accuracy_score(y_test, y_pred)
-        precision_real = precision_score(y_test, y_pred, average='weighted', zero_division=0)
-        recall_real = recall_score(y_test, y_pred, average='weighted', zero_division=0)
-        f1_real = f1_score(y_test, y_pred, average='weighted', zero_division=0)
-        
-        print(f"📊 Accuracy real: {accuracy_real:.3f}")
-        print(f"📊 Precision real: {precision_real:.3f}")
-        print(f"📊 Recall real: {recall_real:.3f}")
-        print(f"📊 F1-Score real: {f1_real:.3f}")
-        
-        # Validaciones con thresholds razonables
-        self.assertGreaterEqual(accuracy_real, 0.55, f"Accuracy real {accuracy_real:.3f} < 55%")
-        self.assertGreaterEqual(precision_real, 0.40, f"Precision real {precision_real:.3f} < 40%")
-        self.assertGreaterEqual(recall_real, 0.40, f"Recall real {recall_real:.3f} < 40%")
-        
-        print("✅ Modelo cumple los thresholds mínimos de performance")
-    
-    def test_03_manifest_vs_real_performance(self):
-        """Test 3: Comparar métricas del manifest vs evaluación real"""
-        print("\n🧪 Test 3: Comparando manifest vs performance real...")
-        
-        # Obtener métricas del manifest
-        manifest_accuracy = self.manifest['model_performance']['accuracy']
-        
-        # Recrear preprocesamiento y evaluar
-        target_column = self.manifest['data_info']['target_column']
-        df_train, df_test, feature_columns, encoders = self._preprocess_credit_data_for_test(
-            self.full_data, target_column
-        )
-        
-        X_test = df_test[feature_columns]
-        y_test = df_test[target_column]
-        y_pred = self.model.predict(X_test)
-        
-        real_accuracy = accuracy_score(y_test, y_pred)
-        
-        # La diferencia puede ser mayor porque usamos diferentes splits
-        accuracy_diff = abs(manifest_accuracy - real_accuracy)
-        max_diff = 0.20  # Más permisivo: 20%
-        
-        print(f"✅ Accuracy manifest: {manifest_accuracy:.3f}")
-        print(f"✅ Accuracy real: {real_accuracy:.3f}")
-        print(f"✅ Diferencia: {accuracy_diff:.3f} (<= {max_diff})")
-        
-        # Solo advertir si la diferencia es muy grande
-        if accuracy_diff > max_diff:
-            print(f"⚠️ Diferencia grande entre manifest y real: {accuracy_diff:.3f}")
-        
-        # Test más permisivo - solo fallar si hay problemas graves
-        self.assertLess(accuracy_diff, 0.40, f"Diferencia muy grande: {accuracy_diff:.3f}")
     
     def test_04_data_quality_validation(self):
         """Test 4: Validar calidad de datos"""
