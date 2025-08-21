@@ -3,8 +3,6 @@ name: Sync to Databricks on Push
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   sync-databricks:
@@ -14,14 +12,34 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Setup Databricks CLI
-      uses: databricks/setup-cli@main
-
-    - name: Update Databricks Git Folder
-      env:
-        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+    - name: Update Databricks Repo via API
       run: |
-        echo "🔄 Updating Databricks Git folder..."
-        databricks repos update "/Workspace/Users/pansezapata@gmail.com/sistecreditodb" --branch main
-        echo "Databricks folder updated successfully!"
+        echo "🔄 Syncing with Databricks..."
+        
+        # Obtener lista de repos
+        REPOS_RESPONSE=$(curl -s -X GET \
+          "${{ secrets.DATABRICKS_HOST }}/api/2.0/repos" \
+          -H "Authorization: Bearer ${{ secrets.DATABRICKS_TOKEN }}")
+        
+        echo "📋 Repos found:"
+        echo "$REPOS_RESPONSE" | jq -r '.repos[].path'
+        
+        # Buscar nuestro repo específico
+        REPO_ID=$(echo "$REPOS_RESPONSE" | jq -r '.repos[] | select(.path=="/Workspace/Users/pansezapata@gmail.com/sistecreditodb") | .id')
+        
+        if [ "$REPO_ID" != "null" ] && [ -n "$REPO_ID" ]; then
+          echo "✅ Found repo ID: $REPO_ID"
+          
+          # Actualizar a branch main
+          curl -X PATCH \
+            "${{ secrets.DATABRICKS_HOST }}/api/2.0/repos/$REPO_ID" \
+            -H "Authorization: Bearer ${{ secrets.DATABRICKS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": "main"}' \
+            --fail-with-body
+          
+          echo "✅ Databricks repo synced successfully!"
+        else
+          echo "❌ Repo not found with path /Workspace/Users/pansezapata@gmail.com/sistecreditodb"
+          exit 1
+        fi
