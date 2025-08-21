@@ -1,0 +1,28 @@
+name: Sync to Databricks on Push
+
+on:
+  push:
+    branches: [ main ]  # Ajusta según tu branch principal
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  sync-databricks:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Databricks CLI
+      uses: databricks/setup-cli@main
+      
+    - name: Update Databricks Git Folder
+      env:
+        DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+        DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      run: |
+        echo "Updating Databricks Git folder..."
+        databricks repos update /Workspace/tu-folder-name --branch main
+        echo "Databricks folder updated successfully!"
