@@ -8,7 +8,7 @@ Pipeline completo de MLOps para modelo de riesgo crediticio usando:
 - **GitHub** para control de versiones
 
 ## Estado del Proyecto
-🚧 **En desarrollo** - Demo para charla MLOps
+**En desarrollo** - Demo para charla MLOps
 
 ## Estructura
 - `notebooks/` - Notebooks de Databricks
